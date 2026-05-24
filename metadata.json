@@ -1,0 +1,8 @@
+{
+  "name": "Learn_GExtensions",
+  "description": "I am bulding this only just to learn the Gnome extention bulding.",
+  "uuid": "LearnGE@zero.learn",
+  "shell-version": [
+    "49"
+  ]
+}
