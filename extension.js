@@ -24,22 +24,41 @@ import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+// ------------------
+import Clutter from 'gi://Clutter';
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
     _init() {
         super._init(0.0, _('My Shiny Indicator'));
 
-        this.add_child(new St.Icon({
-            icon_name: 'face-smile-symbolic',
-            style_class: 'system-status-icon',
-        }));
+        let box = new St.BoxLayout({ style_class: 'panel-status-menu-box'});
 
-        let item = new PopupMenu.PopupMenuItem(_('Show Notification'));
-        item.connect('activate', () => {
-            Main.notify(_('Whatʼs up, folks?'));
+        // this.add_child(new St.Icon({
+        //     icon_name: 'timer-symbolic',
+        //     style_class: 'system-status-icon',
+        // }));
+
+        let icon = new St.Icon({
+            icon_name: 'timer-symbolic',
+            style_class: 'system-status-icon',
         });
-        this.menu.addMenuItem(item);
+
+
+        // let item = new PopupMenu.PopupMenuItem(_('Show Notification'));
+        // item.connect('activate', () => {
+        //     Main.notify(_('Whatʼs up, folks?'));
+        // });
+        // this.menu.addMenuItem(item);
+
+        this._label = new St.Label({
+            text:       '25:00',
+            y_align :   Clutter.ActorAlign.CENTER,
+        });
+
+        box.add_child(icon);
+        box.add_child(this._label);
+        this.add_child(box);
     }
 });
 
@@ -47,10 +66,12 @@ export default class IndicatorExampleExtension extends Extension {
     enable() {
         this._indicator = new Indicator();
         Main.panel.addToStatusArea(this.uuid, this._indicator);
+        console.log("Activated");
     }
 
     disable() {
         this._indicator.destroy();
         this._indicator = null;
+        console.log("Deactivated")
     }
 }
