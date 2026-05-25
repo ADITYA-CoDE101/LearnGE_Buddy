@@ -32,46 +32,53 @@ class Indicator extends PanelMenu.Button {
     _init() {
         super._init(0.0, _('My Shiny Indicator'));
 
-        let box = new St.BoxLayout({ style_class: 'panel-status-menu-box'});
+        this.add_child(new St.Icon({
+            icon_name:      'timer-symbolic',
+            style_class:    'system-status-icon',
+        }));
 
-        // this.add_child(new St.Icon({
-        //     icon_name: 'timer-symbolic',
-        //     style_class: 'system-status-icon',
-        // }));
+        let item = new PopupMenu.PopupMenuItem(_('Show Timer'));  // on hover
 
-        let icon = new St.Icon({
-            icon_name: 'timer-symbolic',
-            style_class: 'system-status-icon',
+        // Giving the signal to do another action.
+        item.connect('activate', () => {
+            Main.notify(_('Whatʼs up, folks?'));   // popup window
         });
 
-
-        // let item = new PopupMenu.PopupMenuItem(_('Show Notification'));
-        // item.connect('activate', () => {
-        //     Main.notify(_('Whatʼs up, folks?'));
-        // });
-        // this.menu.addMenuItem(item);
-
-        this._label = new St.Label({
-            text:       '25:00',
-            y_align :   Clutter.ActorAlign.CENTER,
-        });
-
-        box.add_child(icon);
-        box.add_child(this._label);
-        this.add_child(box);
+        this.menu.addMenuItem(item);
     }
 });
 
 export default class IndicatorExampleExtension extends Extension {
     enable() {
-        this._indicator = new Indicator();
-        Main.panel.addToStatusArea(this.uuid, this._indicator);
-        console.log("Activated");
+        try {
+            this._indicator = new Indicator();
+            Main.panel.addToStatusArea(this.uuid, this._indicator);
+            console.log("Activated ✅");
+        } catch (e) {
+            logError(e);
+            // best-effort cleanup
+            try {
+                if (this._indicator) {
+                    this._indicator.destroy();
+                }
+            } catch (err) {
+                logError(err);
+            }
+            this._indicator = null;
+        }
     }
 
     disable() {
-        this._indicator.destroy();
-        this._indicator = null;
-        console.log("Deactivated")
+        try {
+            if (this._indicator) {
+                this._indicator.destroy();
+                this._indicator = null;
+            }
+            console.log("Deactivated ❌");
+        } catch (e) {
+            logError(e);
+            // ensure we don't leave a dangling reference
+            this._indicator = null;
+        }
     }
 }
