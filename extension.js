@@ -32,18 +32,31 @@ class Indicator extends PanelMenu.Button {
     _init() {
         super._init(0.0, _('My Shiny Indicator'));
 
-        this.add_child(new St.Icon({
-            icon_name:      'timer-symbolic',
-            style_class:    'system-status-icon',
-        }));
+        //A box (container class) to hold icon + label side by side
+        let box = new St.BoxLayout({ style_class: 'panel-status-menu-box'})
 
-        let item = new PopupMenu.PopupMenuItem(_('Show Timer'));  // on hover
-
-        // Giving the signal to do another action.
-        item.connect('activate', () => {
-            Main.notify(_('Whatʼs up, folks?'));   // popup window
+        // The icon
+        let icon = new St.Icon({
+            icon_name:  'timer-symbolic',
+            style_class:'system-status-icon'
         });
 
+        // A label next to icon
+        this._label = new St.Label({
+            text: "24:00",
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+
+        // Simple: text-only menu item with icon via PopupImageMenuItem
+        let item = new PopupMenu.PopupImageMenuItem(
+            'Start 25 min session',   // label
+            'timer-symbolic'           // icon shown on the left
+        );
+        
+
+        box.add_child(icon);
+        box.add_child(this._label);
+        this.add_child(box);
         this.menu.addMenuItem(item);
     }
 });
