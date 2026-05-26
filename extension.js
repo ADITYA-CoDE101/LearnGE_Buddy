@@ -26,6 +26,7 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 // ------------------
 import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib'
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
@@ -58,6 +59,45 @@ class Indicator extends PanelMenu.Button {
         box.add_child(this._label);
         this.add_child(box);
         this.menu.addMenuItem(item);
+
+        // Stopwatch state variables
+        this._elapsedMs = 0;          // Total elapsed time in milliseconds
+        this._startTime = null;        // When the stopwatch started
+        this._isRunning = false;       // Is stopwatch currently running
+        this._timerId = null;          // Timer ID for updates
+
+        // Create menu section
+        this._createMenuItems();
+    }
+
+    _createMenuItems() {
+        let displayBox = new St.BoxLayout({ virtical: true, style_class: null, });
+
+        // larg time display
+        this._displayLabel = new St.Label({
+            text: '00:00',
+            style_class: null,
+        })
+
+        displayBox.add_child(this._displayLabel);
+
+                // Separator
+        let separator = new PopupMenu.PopupSeparatorMenuItem();
+        this.menu.addMenuItem(separator);
+
+        // Button box
+        let buttonBox = new St.BoxLayout({
+            style_class: 'panel-status-menu-box'
+        });
+
+                // Start button
+        this._startBtn = new St.Button({
+            label: '▶ Start',
+            style_class: 'stopwatch-btn stopwatch-btn-start'
+        });
+        this._startBtn.connect('clicked', () => this._start());
+        buttonsBox.add_child(this._startBtn);
+
     }
 });
 
