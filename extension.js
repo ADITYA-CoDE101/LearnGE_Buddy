@@ -44,14 +44,19 @@ class Indicator extends PanelMenu.Button {
 
         // A label next to icon
         this._label = new St.Label({
-            text: "24:00",
+            text: "00:00",
             y_align: Clutter.ActorAlign.CENTER,
         });
 
         // Simple: text-only menu item with icon via PopupImageMenuItem
         let item = new PopupMenu.PopupImageMenuItem(
-            'Start 25 min session',   // label
-            'timer-symbolic'           // icon shown on the left
+            'The Sutdy session Starts',   // label
+            'timer-symbolic'              // icon shown on the left
+        );
+
+        let item2 = new PopupMenu.PopupImageMenuItem(
+            "CDS Prep",
+            'battery-lightning-symbolic'
         );
         
 
@@ -59,6 +64,7 @@ class Indicator extends PanelMenu.Button {
         box.add_child(this._label);
         this.add_child(box);
         this.menu.addMenuItem(item);
+        this.menu.addMenuItem(item2);
 
         // Stopwatch state variables
         this._elapsedMs = 0;          // Total elapsed time in milliseconds
@@ -71,26 +77,29 @@ class Indicator extends PanelMenu.Button {
     }
 
     _createMenuItems() {
-        let displayBox = new St.BoxLayout({ virtical: true, style_class: null, });
+        let displayBox = new St.BoxLayout({ vertical: true, style_class: null });
 
-        // larg time display
+        // large time display
         this._displayLabel = new St.Label({
             text: '00:00',
             style_class: null,
-        })
-
+        });
         displayBox.add_child(this._displayLabel);
 
-                // Separator
+        let displayItem = new PopupMenu.PopupBaseMenuItem({ activate: false });
+        displayItem.actor.add_child(displayBox);
+        this.menu.addMenuItem(displayItem);
+
+        // Separator
         let separator = new PopupMenu.PopupSeparatorMenuItem();
         this.menu.addMenuItem(separator);
 
         // Button box
-        let buttonBox = new St.BoxLayout({
+        let buttonsBox = new St.BoxLayout({
             style_class: 'panel-status-menu-box'
         });
 
-                // Start button
+        // Start button
         this._startBtn = new St.Button({
             label: '▶ Start',
             style_class: 'stopwatch-btn stopwatch-btn-start'
@@ -98,8 +107,103 @@ class Indicator extends PanelMenu.Button {
         this._startBtn.connect('clicked', () => this._start());
         buttonsBox.add_child(this._startBtn);
 
+        // Pause button
+        this._pauseBtn = new St.Button({
+            label: '⏸ Pause',
+            style_class: 'stopwatch-btn stopwatch-btn-pause'
+        });
+        this._pauseBtn.connect('clicked', () => this._pause());
+        this._pauseBtn.reactive = false;  // Disabled until started
+        buttonsBox.add_child(this._pauseBtn);
+
+        // Reset button
+        this._resetBtn = new St.Button({
+            label: '⟲ Reset',
+            style_class: 'stopwatch-btn stopwatch-btn-reset'
+        });
+        this._resetBtn.connect('clicked', () => this._reset());
+        buttonsBox.add_child(this._resetBtn);
+
+        // Add items to menu
+        this.menu.box.add_child(this._displayLabel);
+        this.menu.box.add_child(separator);
+        this.menu.box.add_child(buttonsBox);
+    }
+
+    _start() {
+        if (!this._isRunning) {
+            this._isRunning = true;
+            this._startTime = GLib.get_monotonic_time() / 1000 - this._elapsedMs;
+            
+            // Update every 100ms
+            this._timerId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
+                this._updateDisplay();
+                return true; // Keep timer running
+            });
+
+            // Update button states
+            this._startBtn.reactive = false;
+            this._pauseBtn.reactive = true;
+        }
+    }
+
+    _pause() {
+        if (this._isRunning) {
+            this._isRunning = false;
+            
+            // Remove timer
+            if (this._timerId) {
+                GLib.source_remove(this._timerId);
+                this._timerId = null;
+            }
+
+            // Update button states
+            this._startBtn.reactive = true;
+            this._pauseBtn.reactive = false;
+        }
+    }
+
+    _reset() {
+        // Stop the timer if running
+        if (this._isRunning) {
+            this._pause();
+        }
+
+        // Reset all values
+        this._elapsedMs = 0;
+        this._startTime = null;
+        
+        // Update displays
+        this._updateDisplay();
+        
+        // Reset button states
+        this._startBtn.reactive = true;
+        this._pauseBtn.reactive = false;
+    }
+
+    _updateDisplay() {
+        // Calculate elapsed time
+        if (this._isRunning) {
+            this._elapsedMs = GLib.get_monotonic_time() / 1000 - this._startTime;
+        }
+
+        // Format time as MM:SS
+        let totalSeconds = Math.floor(this._elapsedMs / 1000);
+        let minutes = Math.floor(totalSeconds / 60);
+        let seconds = totalSeconds % 60;
+
+        let timeStr = this._formatTime(minutes, seconds);
+
+        // Update labels
+        this._label.text = timeStr;
+        this._displayLabel.text = timeStr;
+    }
+
+    _formatTime(minutes, seconds) {
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
 });
+
 
 export default class IndicatorExampleExtension extends Extension {
     enable() {
