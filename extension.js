@@ -50,7 +50,7 @@ class Indicator extends PanelMenu.Button {
 
         // Simple: text-only menu item with icon via PopupImageMenuItem
         let item = new PopupMenu.PopupImageMenuItem(
-            'The Sutdy session Starts',   // label
+            'The Study Time! ',   // label
             'timer-symbolic'              // icon shown on the left
         );
 
@@ -91,11 +91,13 @@ class Indicator extends PanelMenu.Button {
         this.menu.addMenuItem(displayItem);
 
         // Separator
-        let separator = new PopupMenu.PopupSeparatorMenuItem();
-        this.menu.addMenuItem(separator);
+        // let separator = new PopupMenu.PopupSeparatorMenuItem();
+        // this.menu.addMenuItem(separator);            OR ↓
+        //                                                 ↓
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // Button box
-        let buttonsBox = new St.BoxLayout({
+        let buttonBox = new St.BoxLayout({
             style_class: 'panel-status-menu-box'
         });
 
@@ -105,7 +107,7 @@ class Indicator extends PanelMenu.Button {
             style_class: 'stopwatch-btn stopwatch-btn-start'
         });
         this._startBtn.connect('clicked', () => this._start());
-        buttonsBox.add_child(this._startBtn);
+        buttonBox.add_child(this._startBtn);
 
         // Pause button
         this._pauseBtn = new St.Button({
@@ -114,7 +116,7 @@ class Indicator extends PanelMenu.Button {
         });
         this._pauseBtn.connect('clicked', () => this._pause());
         this._pauseBtn.reactive = false;  // Disabled until started
-        buttonsBox.add_child(this._pauseBtn);
+        buttonBox.add_child(this._pauseBtn);
 
         // Reset button
         this._resetBtn = new St.Button({
@@ -122,12 +124,12 @@ class Indicator extends PanelMenu.Button {
             style_class: 'stopwatch-btn stopwatch-btn-reset'
         });
         this._resetBtn.connect('clicked', () => this._reset());
-        buttonsBox.add_child(this._resetBtn);
+        buttonBox.add_child(this._resetBtn);
 
         // Add items to menu
-        this.menu.box.add_child(this._displayLabel);
-        this.menu.box.add_child(separator);
-        this.menu.box.add_child(buttonsBox);
+        let btnItem = new PopupMenu.PopupBaseMenuItem({ activate: false });
+        btnItem.actor.add_child(buttonBox);
+        this.menu.addMenuItem(btnItem);
     }
 
     _start() {
@@ -228,6 +230,13 @@ export default class IndicatorExampleExtension extends Extension {
     disable() {
         try {
             if (this._indicator) {
+
+                // Stop the timer first befor stoping the actual object
+
+                if(this._indicator._timerId){
+                    GLib.source_remove(this._indicator._timerId);
+                    this._indicator._timerId = null;
+                }
                 this._indicator.destroy();
                 this._indicator = null;
             }
