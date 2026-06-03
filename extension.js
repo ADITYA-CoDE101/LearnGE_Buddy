@@ -44,7 +44,7 @@ class Indicator extends PanelMenu.Button {
 
         // A label next to icon
         this._label = new St.Label({
-            text: "00:00",
+            text: "00:00:00",
             y_align: Clutter.ActorAlign.CENTER,
         });
 
@@ -76,6 +76,8 @@ class Indicator extends PanelMenu.Button {
         this._createMenuItems();
     }
 
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+
     _createMenuItems() {
         let displayBox = new St.BoxLayout({ vertical: true, style_class: null });
 
@@ -101,6 +103,8 @@ class Indicator extends PanelMenu.Button {
             style_class: 'panel-status-menu-box'
         });
 
+        // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+
         // Start button
         this._startBtn = new St.Button({
             label: '▶ Start',
@@ -108,6 +112,8 @@ class Indicator extends PanelMenu.Button {
         });
         this._startBtn.connect('clicked', () => this._start());
         buttonBox.add_child(this._startBtn);
+
+        // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
 
         // Pause button
         this._pauseBtn = new St.Button({
@@ -118,6 +124,8 @@ class Indicator extends PanelMenu.Button {
         this._pauseBtn.reactive = false;  // Disabled until started
         buttonBox.add_child(this._pauseBtn);
 
+        // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+
         // Reset button
         this._resetBtn = new St.Button({
             label: '⟲ Reset',
@@ -126,11 +134,24 @@ class Indicator extends PanelMenu.Button {
         this._resetBtn.connect('clicked', () => this._reset());
         buttonBox.add_child(this._resetBtn);
 
+        // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+
+        this._historyBtn = new St.Button({
+            label: "History",
+            style_class: 'stopwatch-btn stopwatch-btn-pause'
+        })
+        this._historyBtn.connect('clicked', () => this._history());
+        buttonBox.add_child(this._historyBtn);
+
+        // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+
         // Add items to menu
         let btnItem = new PopupMenu.PopupBaseMenuItem({ activate: false });
         btnItem.actor.add_child(buttonBox);
         this.menu.addMenuItem(btnItem);
     }
+
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
 
     _start() {
         if (!this._isRunning) {
@@ -149,6 +170,8 @@ class Indicator extends PanelMenu.Button {
         }
     }
 
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+
     _pause() {
         if (this._isRunning) {
             this._isRunning = false;
@@ -164,6 +187,8 @@ class Indicator extends PanelMenu.Button {
             this._pauseBtn.reactive = false;
         }
     }
+
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
 
     _reset() {
         // Stop the timer if running
@@ -182,6 +207,14 @@ class Indicator extends PanelMenu.Button {
         this._startBtn.reactive = true;
         this._pauseBtn.reactive = false;
     }
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+
+
+    _history(){
+        return true;
+    }
+
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
 
     _updateDisplay() {
         // Calculate elapsed time
@@ -189,23 +222,28 @@ class Indicator extends PanelMenu.Button {
             this._elapsedMs = GLib.get_monotonic_time() / 1000 - this._startTime;
         }
 
-        // Format time as MM:SS
+        // Format time as HH:MM:SS
         let totalSeconds = Math.floor(this._elapsedMs / 1000);
-        let minutes = Math.floor(totalSeconds / 60);
+        let hours = Math.floor(totalSeconds / 3600);
+        let minutes = Math.floor((totalSeconds % 3600) / 60);
         let seconds = totalSeconds % 60;
 
-        let timeStr = this._formatTime(minutes, seconds);
+        let timeStr = this._formatTime(hours, minutes, seconds);
 
         // Update labels
         this._label.text = timeStr;
         this._displayLabel.text = timeStr;
     }
 
-    _formatTime(minutes, seconds) {
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+
+    _formatTime(hours, minutes, seconds) {
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
 });
 
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
 
 export default class IndicatorExampleExtension extends Extension {
     enable() {
