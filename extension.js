@@ -70,7 +70,7 @@ class Indicator extends PanelMenu.Button {
         this._elapsedMs = 0;          // Total elapsed time in milliseconds
         this._startTime = null;        // When the stopwatch started
         this._isRunning = false;       // Is stopwatch currently running
-        this._timerId = null;          // Timer ID for updates
+        this._timerId   = null;          // Timer ID for updates
 
         // Create menu section
         this._createMenuItems();
@@ -90,6 +90,13 @@ class Indicator extends PanelMenu.Button {
 
         let displayItem = new PopupMenu.PopupBaseMenuItem({ activate: false });
         displayItem.actor.add_child(displayBox);
+        displayItem.actor.reactive      = false;
+        displayItem.actor.track_hover   = false;
+        this._displayLabel.reactive     = false;
+        this._displayLabel.can_focus    = false;
+        // Prevent clicks from bubbling to the menu (stops menu closing)
+        displayItem.actor.connect('button-press-event', () => Clutter.EVENT_STOP);
+        displayItem.actor.connect('button-release-event', () => Clutter.EVENT_STOP);
         this.menu.addMenuItem(displayItem);
 
         // Separator
