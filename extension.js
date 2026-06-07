@@ -34,10 +34,10 @@ class Indicator extends PanelMenu.Button {
         super._init(0.0, _('My Shiny Indicator'));
 
         //A box (container class) to hold icon + label side by side
-        let box = new St.BoxLayout({ style_class: 'panel-status-menu-box'})
+        this._box = new St.BoxLayout({ style_class: 'panel-status-menu-box'})
 
         // The icon
-        let icon = new St.Icon({
+        this._icon = new St.Icon({
             icon_name:  'timer-symbolic',
             style_class:'system-status-icon'
         });
@@ -48,23 +48,9 @@ class Indicator extends PanelMenu.Button {
             y_align: Clutter.ActorAlign.CENTER,
         });
 
-        // Simple: text-only menu item with icon via PopupImageMenuItem
-        let item = new PopupMenu.PopupImageMenuItem(
-            'The Study Time! ',   // label
-            'timer-symbolic'              // icon shown on the left
-        );
-
-        let item2 = new PopupMenu.PopupImageMenuItem(
-            "CDS Prep",
-            'battery-lightning-symbolic'
-        );
-        
-
-        box.add_child(icon);
-        box.add_child(this._label);
-        this.add_child(box);
-        this.menu.addMenuItem(item);
-        this.menu.addMenuItem(item2);
+        this._box.add_child(this._icon);
+        this._box.add_child(this._label);
+        this.add_child(this._box);
 
         // Stopwatch state variables
         this._elapsedMs = 0;          // Total elapsed time in milliseconds
@@ -79,12 +65,33 @@ class Indicator extends PanelMenu.Button {
 // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
 
     _createMenuItems() {
-        let displayBox = new St.BoxLayout({ vertical: true, style_class: null });
+
+        // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼** line 51
+         // Simple: text-only menu item with icon via PopupImageMenuItem
+        let item = new PopupMenu.PopupImageMenuItem(
+            'The Study Time! ',   // label
+            'timer-symbolic'              // icon shown on the left
+        );
+
+        let item2 = new PopupMenu.PopupImageMenuItem(
+            "CDS Prep",
+            'battery-lightning-symbolic'
+        );
+
+        
+        this.menu.addMenuItem(item);
+        this.menu.addMenuItem(item2);
+
+        // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼**
+
+
+        let displayBox = new St.BoxLayout({ 
+            vertical: true 
+        });
 
         // large time display
         this._displayLabel = new St.Label({
-            text: '00:00',
-            style_class: null,
+            text: '00:00:00',
         });
         displayBox.add_child(this._displayLabel);
 
@@ -180,7 +187,9 @@ class Indicator extends PanelMenu.Button {
 // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
 
     _pause() {
+
         if (this._isRunning) {
+            this._elapsedMs = GLib.get_monotonic_time() /1000 - this._startTime;
             this._isRunning = false;
             
             // Remove timer
@@ -218,7 +227,7 @@ class Indicator extends PanelMenu.Button {
 
 
     _history(){
-        return true;
+        // TODO: implement session history display
     }
 
 // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
@@ -234,7 +243,7 @@ class Indicator extends PanelMenu.Button {
         let hours = Math.floor(totalSeconds / 3600);
         let minutes = Math.floor((totalSeconds % 3600) / 60);
         let seconds = totalSeconds % 60;
-
+        
         let timeStr = this._formatTime(hours, minutes, seconds);
 
         // Update labels
@@ -247,10 +256,15 @@ class Indicator extends PanelMenu.Button {
     _formatTime(hours, minutes, seconds) {
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
-});
 
-// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
-// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+    destroy() {
+        if (this._timerId) {
+            GLib.source_remove(this._timerId);
+            this._timerId = null;
+        }
+        super.destroy();
+    }
+});
 
 export default class IndicatorExampleExtension extends Extension {
     enable() {
@@ -259,14 +273,14 @@ export default class IndicatorExampleExtension extends Extension {
             Main.panel.addToStatusArea(this.uuid, this._indicator);
             console.log("Activated ✅");
         } catch (e) {
-            logError(e);
+            console.error(e);
             // best-effort cleanup
             try {
                 if (this._indicator) {
                     this._indicator.destroy();
                 }
-            } catch (err) {
-                logError(err);
+            } catch (e) {
+                console.error(e);
             }
             this._indicator = null;
         }
@@ -275,21 +289,19 @@ export default class IndicatorExampleExtension extends Extension {
     disable() {
         try {
             if (this._indicator) {
-
-                // Stop the timer first befor stoping the actual object
-
-                if(this._indicator._timerId){
-                    GLib.source_remove(this._indicator._timerId);
-                    this._indicator._timerId = null;
-                }
                 this._indicator.destroy();
                 this._indicator = null;
             }
             console.log("Deactivated ❌");
         } catch (e) {
-            logError(e);
-            // ensure we don't leave a dangling reference
+            console.error(e)
             this._indicator = null;
         }
     }
 }
+
+
+
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼** line [0000-9999]   :   coppied from .
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼      :   Function seprator.
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼    :   Internal block serparator.
