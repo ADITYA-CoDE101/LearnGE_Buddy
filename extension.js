@@ -257,6 +257,8 @@ class Indicator extends PanelMenu.Button {
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
 
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+
     destroy() {
         if (this._timerId) {
             GLib.source_remove(this._timerId);
@@ -272,15 +274,15 @@ export default class IndicatorExampleExtension extends Extension {
             this._indicator = new Indicator();
             Main.panel.addToStatusArea(this.uuid, this._indicator);
             console.log("Activated ✅");
-        } catch (e) {
-            console.error(e);
+        } catch (e1) {
+            console.error(e1);
             // best-effort cleanup
             try {
                 if (this._indicator) {
                     this._indicator.destroy();
                 }
-            } catch (e) {
-                console.error(e);
+            } catch (e2) {
+                console.error(e2);
             }
             this._indicator = null;
         }
