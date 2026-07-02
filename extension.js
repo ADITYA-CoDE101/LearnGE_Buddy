@@ -24,9 +24,18 @@ import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+
 // ------------------
+
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib'
+
+// -----IMPORT EXTERNAL MODULES-------------
+
+import { saveSession, getAllSessions } from './db.js';
+
+// ------------------
+
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
@@ -211,6 +220,14 @@ class Indicator extends PanelMenu.Button {
         if (this._isRunning) {
             this._pause();
         }
+
+        // ----Database(JSON)--------------
+        const end = Math.floor(Date.now() / 1000);
+        const start = Math.floor(Date.now() / 1000) - 3600;
+        saveSession(start, end, 'study', 'completed Number system');
+        // To see all your data:
+        const allSessions = getAllSessions();
+        console.log(allSessions); // prints in journalctl
 
         // Reset all values
         this._elapsedMs = 0;
