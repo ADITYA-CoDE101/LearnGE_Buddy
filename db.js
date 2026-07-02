@@ -14,7 +14,7 @@ const DATA_FILE = GLib.build_filenamev([DATA_DIR, 'sessions.json']);
  * Like: os.makedirs(path, exist_ok=True) in Python.
  */
 
-function _encureDIR(){
+function _ensureDir(){
     /**
      * 0o755 in Python = 0755 in octal JS = 493 in decimal
      * 0o455 is  permission code  ---> It tells the operating system who is allowed to do what with a folder.
@@ -48,12 +48,12 @@ function _readData(){
         if (!ok) return { sessions: [ ]};
 
         // bytes is a unit 8 Array, we decode it to  string, then parse JSON
-        const text = new TestDecoder().decode(bytes);
+        const text = new TextDecoder().decode(bytes);
         return JSON.parse(text);
 
     }catch (e) {
         // FIle doesn;t exist yet, ot is corrupt  - start fresh
-        console.warn('[study-timer] Could not read data file: ${e.message}');
+        console.warn(`[study-timer] Could not read data file: ${e.message}`);
         return { sessions: [] };
     }
 }
@@ -66,9 +66,9 @@ function _readData(){
  */
 function _writeData(data){
     try {
-        _encureDIR();
+        _ensureDir();
         const text = JSON.stringify(data, null, 2) // null, 2 = pretty-print with 2 spaces
-        GLib.file_get_contents(DATA_FILE, test);
+        GLib.file_set_contents(DATA_FILE, text);
     } catch (e) {
         console.error(`[study-timer] Could not write data file: ${e.message}`);
     }
@@ -87,7 +87,7 @@ function _writeData(data){
  * Python equivalent:
  *   def save_session(start_time, end_time, label="", note=""):
  */
-export function saveSession(startTIme, endTime, label = '', note = '') {
+export function saveSession(startTime, endTime, label = '', note = '') {
     const data = _readData();
 
     // Build the session record — like building a dict in Python
@@ -100,7 +100,7 @@ export function saveSession(startTIme, endTime, label = '', note = '') {
         note: note,
     };
 
-    data.sessions.puch(session);
+    data.sessions.push(session);
     _writeData(data);
     
     console.log(`[study-timer] Session saved: ${session.duration_seconds}s on ${session.date}`);
