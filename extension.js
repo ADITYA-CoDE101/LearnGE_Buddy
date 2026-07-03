@@ -222,12 +222,20 @@ class Indicator extends PanelMenu.Button {
         }
 
         // ----Database(JSON)--------------
-        const end = Math.floor(Date.now() / 1000);
-        const start = Math.floor(Date.now() / 1000) - 3600;
-        saveSession(start, end, 'study', 'completed Number system');
+        const end   = Math.floor(Date.now() / 1000);
+        const start = end - Math.floor(this._elapsedMs / 1000);
+        const duration = Math.floor(this._elapsedMs / 1000);
+
+        // only save if there's something worth saving . I also meed to add a prompt at will ask to save or not.
+        if(duration >= 5) {
+            saveSession(start, end, 'study', 'completed Number system');
+            console.log(`[study-timer] Saved ${duration}s session`);
+        }
+        
         // To see all your data:
         const allSessions = getAllSessions();
         console.log(allSessions); // prints in journalctl
+
 
         // Reset all values
         this._elapsedMs = 0;
