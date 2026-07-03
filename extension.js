@@ -62,13 +62,17 @@ class Indicator extends PanelMenu.Button {
         this.add_child(this._box);
 
         // Stopwatch state variables
-        this._elapsedMs = 0;          // Total elapsed time in milliseconds
+        this._elapsedMs = 0;           // Total elapsed time in milliseconds
         this._startTime = null;        // When the stopwatch started
         this._isRunning = false;       // Is stopwatch currently running
-        this._timerId   = null;          // Timer ID for updates
+        this._timerId   = null;        // Timer ID for updates
 
         // Create menu section
         this._createMenuItems();
+
+        // The History flags
+        this._historyVisible = false;    // is history panel open right now?
+        this._historyItems   = [];       // list of menu items we added (so we can remove them)
     }
 
 // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
@@ -251,9 +255,57 @@ class Indicator extends PanelMenu.Button {
 // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
 
 
-    _history(){
-        // TODO: implement session history display
+    _history() {
+
+    // ─── CASE 1: History is visible → HIDE it ───────────────────
+    if (this._historyVisible) {
+
+        // Remove every item we previously added
+        // Like: for item in self._history_items: item.destroy()
+        this._historyItems.forEach(item => item.destroy());
+
+        // Clear the list — like self._history_items.clear()
+        this._historyItems = [];
+
+        this._historyVisible = false;
+        return;  // stop here, nothing more to do
     }
+
+    // ─── CASE 2: History is hidden → SHOW it ────────────────────
+    this._historyVisible = true;
+
+    // Read all sessions from the JSON file
+    const sessions = getAllSessions();
+
+    // If no sessions saved yet, show a friendly message
+    if (sessions.length === 0) {
+        let emptyItem = new PopupMenu.PopupMenuItem('No sessions yet!');
+        emptyItem.reactive = false;  // not clickable
+        this.menu.addMenuItem(emptyItem);
+        this._historyItems.push(emptyItem);  // remember it so we can remove it later
+        return;
+    }
+
+    // Add a separator first so history looks separate from buttons
+    let sep = new PopupMenu.PopupSeparatorMenuItem();
+    this.menu.addMenuItem(sep);
+    this._historyItems.push(sep);
+
+    // Loop through sessions — most recent first
+    // Like: for session in reversed(sessions):
+    const reversed = [...sessions].reverse();  // spread operator = copy the array first
+
+    reversed.forEach(session => {
+        // Build a readable label for each session
+        // e.g.  "2026-07-04  |  01:30:00  |  study"
+        const label = `${session.date}  |  ${session.duration_HH_MM_SS}  |  ${session.label}`;
+
+        let row = new PopupMenu.PopupMenuItem(label);
+        row.reactive = false;  // just display, not clickable for now
+        this.menu.addMenuItem(row);
+        this._historyItems.push(row);  // remember it
+    });
+}
 
 // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
 
