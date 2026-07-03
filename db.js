@@ -89,16 +89,33 @@ function _writeData(data){
  */
 export function saveSession(startTime, endTime, label = '', note = '') {
     const data = _readData();
+        let totalSeconds = endTime - startTime;
+        let hours = Math.floor(totalSeconds / 3600);
+        let minutes = Math.floor((totalSeconds % 3600) / 60);
+        let seconds = totalSeconds % 60;
 
     // Build the session record — like building a dict in Python
     const session = {
         date: new Date(startTime * 1000).toISOString().slice(0, 10), // "2025-06-07"
         start_time: startTime,
         end_time: endTime,
-        duration_seconds: endTime - startTime,
+        duration_seconds: endTime - startTime,  // totalSeconds
+        duration_HH_MM_SS: `${hours}:${minutes}:${seconds}`,
+        time_fields: {
+            Hours: hours,
+            Minutes: minutes,
+            Seconds: seconds
+        },
         label: label,
         note: note,
     };
+
+    /**
+        let totalSeconds = Math.floor(this._elapsedMs / 1000);
+        let hours = Math.floor(totalSeconds / 3600);
+        let minutes = Math.floor((totalSeconds % 3600) / 60);
+        let seconds = totalSeconds % 60;
+     */
 
     data.sessions.push(session);
     _writeData(data);
