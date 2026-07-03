@@ -74,6 +74,13 @@ function _writeData(data){
     }
 }
 
+function _formatHMS(totalSeconds) {
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
 // ─── PUBLIC API ───────────────────────────────────────────────────────────────
 
 /**
@@ -89,23 +96,16 @@ function _writeData(data){
  */
 export function saveSession(startTime, endTime, label = '', note = '') {
     const data = _readData();
-        let totalSeconds = endTime - startTime;
-        let hours = Math.floor(totalSeconds / 3600);
-        let minutes = Math.floor((totalSeconds % 3600) / 60);
-        let seconds = totalSeconds % 60;
+
 
     // Build the session record — like building a dict in Python
+    const totalSeconds = endTime - startTime;
     const session = {
         date: new Date(startTime * 1000).toISOString().slice(0, 10), // "2025-06-07"
         start_time: startTime,
         end_time: endTime,
         duration_seconds: endTime - startTime,  // totalSeconds
-        duration_HH_MM_SS: `${hours}:${minutes}:${seconds}`,
-        time_fields: {
-            Hours: hours,
-            Minutes: minutes,
-            Seconds: seconds
-        },
+        duration_HH_MM_SS: _formatHMS(totalSeconds),
         label: label,
         note: note,
     };
