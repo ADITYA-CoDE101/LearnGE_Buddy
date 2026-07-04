@@ -73,6 +73,9 @@ class Indicator extends PanelMenu.Button {
         // The History flags
         this._historyVisible = false;    // is history panel open right now?
         this._historyItems   = [];       // list of menu items we added (so we can remove them)
+
+        // Session flag
+        this.sessionFlg = false;        // It will monitor if the change occuers in the same session or new session
     }
 
 // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
@@ -185,6 +188,12 @@ class Indicator extends PanelMenu.Button {
             this._isRunning = true;
             this._startTime = GLib.get_monotonic_time() / 1000 - this._elapsedMs;
             
+            // Input field
+            let entry = new St.Entry({
+                name: 'Activity',
+                hint_text: 'Activity: Study, portsweger...'
+                track_hover
+            })
             // Update every 100ms
             this._timerId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
                 this._updateDisplay();
