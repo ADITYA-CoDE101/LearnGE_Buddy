@@ -75,7 +75,9 @@ class Indicator extends PanelMenu.Button {
         this._historyItems   = [];       // list of menu items we added (so we can remove them)
 
         // Session flag
-        this.sessionFlg = false;        // It will monitor if the change occuers in the same session or new session
+        this._sessionFlg = false;        // It will monitor if the change occuers in the same session or new session
+        this._activity = null;
+        this._description = null;
     }
 
 // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
@@ -127,6 +129,22 @@ class Indicator extends PanelMenu.Button {
         // this.menu.addMenuItem(separator);            OR ↓
         //                                                 ↓
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+       
+        // Input field
+        this._myEntry = new St.Entry({
+            name: 'Activity',
+            hint_text: 'Activity: Study, portsweger...',
+            track_hover: true,
+            x_expand: true,
+        });
+
+        // Add entry to menu
+        let entryItem = new PopupMenu.PopupBaseMenuItem({ activate: false });
+        entryItem.actor.add_child(this._myEntry);
+        this.menu.addMenuItem(entryItem);
+        this._entry(this._myEntry);
+
 
         // Button box
         let buttonBox = new St.BoxLayout({
@@ -183,17 +201,40 @@ class Indicator extends PanelMenu.Button {
 
 // ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
 
+    _entry( entryField ) {
+        // Here we are grabbing the internal text actors to listen for the key presses
+        const entryClutterText = entryField.get_clutter_text();
+
+        const keyPressId = entryClutterText.connect('key-press-event', (actor, event) => {
+            //Check if the pressed key is Enter
+            if (event.get_key_symbol() === Clutter.KEY_Return){
+                console.log(`User entered the input text: ${entryField.get_text()}`);
+                this._activity = entryField.get_text();
+
+                // Set session flag and start timer
+                this._sessionFlg = true;
+                entryField.reactive = false;  // Disable input after capturing
+                
+                return Clutter.EVENT_STOP;
+            }
+            return Clutter.EVENT_PROPAGATE;
+        })
+
+    }
+
+// ⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼
+
     _start() {
+        if(!this._sessionFlg){
+            this._myEntry.reactive = true;
+            this._myEntry.grab_key_focus();  // Focus on input field
+            return; // Wait for user to press Enter
+        }
+
         if (!this._isRunning) {
             this._isRunning = true;
             this._startTime = GLib.get_monotonic_time() / 1000 - this._elapsedMs;
-            
-            // Input field
-            let entry = new St.Entry({
-                name: 'Activity',
-                hint_text: 'Activity: Study, portsweger...'
-                track_hover
-            })
+
             // Update every 100ms
             this._timerId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
                 this._updateDisplay();
@@ -241,7 +282,7 @@ class Indicator extends PanelMenu.Button {
 
         // only save if there's something worth saving . I also meed to add a prompt at will ask to save or not.
         if(duration >= 5) {
-            saveSession(start, end, 'study', 'completed Number system');
+            saveSession(start, end, this._activity, 'completed Number system');
             console.log(`[study-timer] Saved ${duration}s session`);
         }
         
@@ -249,10 +290,17 @@ class Indicator extends PanelMenu.Button {
         const allSessions = getAllSessions();
         console.log(allSessions); // prints in journalctl
 
+        // reset the _sessionflag
+        this._sessionFlg = false;
 
         // Reset all values
         this._elapsedMs = 0;
         this._startTime = null;
+
+        // Reset the Entry value
+        this._myEntry.set_text('');
+        this._myEntry.reactive = false;
+
         
         // Update displays
         this._updateDisplay();
